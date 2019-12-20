@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %} Delete {{ assignments.name }} ? {% endblock title %}
+
+{% block content %}
+    <h3 class="mb-3">Confirm deletion</h3>
+    <br>
+    Are you sure you want to delete the quiz <strong>"{{ assignments.name }}"</strong>? There is no going back.
+    <br><br>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, I'm sure</button>
+        <a href="{% url 'teachers:assignment_change' assignments.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+    </form>
+{% endblock content %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %} {{ assignments.name }} {% endblock title %}
+
+{% block content %}
+    <div class="row mb-3">
+        <div class="col-md-6 col-sm-8 col-12">
+            <h3 class="mb-3">My Assignments</h3>
+            <form method = 'post'>
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type='submit' class="btn btn-success">Save changes</button>
+                <a href="{% url 'teachers:assignment_change_list'%}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+                <a href="{% url 'teachers:assignment_delete' assignments.pk %}" class="btn btn-danger float-right" role="button">Delete</a>
+            </form>
+            <br>
+        </div>
+    </div>
+        <strong>Question</strong>
+        <br>
+        <div class="card">
+            <div class="list-group list-group-flush list-group-formset">
+                {% for question in questions %}
+                    <div class="list-group-item">
+                        <div class="row">
+                            <div class="col-10">
+                                <a href="{% url 'teachers:question_change' assignments.pk question.pk %}">{{ question.text }}</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="list-group-item text-center">
+                        You haven't created any questions. <a href="{% url 'teachers:question_add' assignments.pk%}">Add questions.</a>
+                    </div>
+                {% endfor %}
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'teachers:question_add' assignments.pk %}" class="btn btn-primary btn-sm">Add question</a>
+            <a href="#" class="btn btn-primary btn-sm">Add image</a>
+        </div>
+{% endblock content %}

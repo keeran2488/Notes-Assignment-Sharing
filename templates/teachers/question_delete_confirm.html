@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %} Question Delete Form {% endblock title %}
+
+{% block content %}
+    <h3 class="mb-3">Confirm deletion</h3>
+    Are you sure you want to delete the question <strong>"{{ question.text }}"</strong>? There is no going back.
+    <br><br>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Yes, I'm sure</button>
+        <a href="{% url 'teachers:question_change' assignments.pk question.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+    </form>
+{% endblock content %}

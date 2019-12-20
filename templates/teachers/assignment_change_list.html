@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %} My Assignments {% endblock title %}
+
+{% block content %}
+    
+    <h2 class="mb-3">Assignments</h2>
+    <a href="{% url 'teachers:assignment_add' %}" class="btn btn-primary" role="button">Add Assignment</a></p>
+    <div class='card'>
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Assignment</th>
+                    <th>Subject</th>
+                    <th>Semester</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                    <tr>
+                        <td class="align-middle"><a href="{% url 'teachers:assignment_change' assignment.pk%}">{{ assignment.name }}</a></td>
+                        <td class="align-middle">{{ assignment.subject }}</td>
+                        <td class="align-middle">{{ assignment.subject.semester }}</td>
+                        <td class="align-middle"><a href="#" class="btn btn-primary" role="button">Result</a></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td>You haven't created any Assignments</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

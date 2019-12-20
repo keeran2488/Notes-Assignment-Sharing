@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %} Welcome {% endblock title %}
+
+{% block content %}
+Welcome, 
+{% if user.is_authenticated and user.is_teacher %}
+      Teacher {{ user.username }}
+{% else %}
+      Student {{ user.username }}
+{% endif %}
+<a href="{% url 'logout' %}">Logout</a>
+
+{% endblock content %}
