@@ -134,7 +134,7 @@ def question_add(request, pk):
     assignment = get_object_or_404(Assignment, pk=pk, owner=request.user)
 
     if request.method == 'POST':
-        form = QuestionForm(request.POST)
+        form = QuestionForm(request.POST, request.FILES)
         if form.is_valid():
             question = form.save(commit=False)
             question.assignment = assignment
@@ -152,7 +152,7 @@ def question_change(request, assignment_pk, question_pk):
     question = get_object_or_404(Question, pk=question_pk, assignment=assignment)
 
     if request.method == 'POST':
-        form = QuestionForm(request.POST, instance=question)
+        form = QuestionForm(request.POST, request.FILES, instance=question)
         if form.is_valid():
             with transaction.atomic():
                 form.save()
@@ -239,3 +239,14 @@ class StudentAssignmentListView(ListView):
         student_subs = Subject.objects.filter(semester__in = student_semester).values_list('pk', flat=True)
         queryset = Assignment.objects.filter(subject__in = student_subs).order_by('-submission_date')
         return queryset
+
+
+def take_assignment(request, pk):
+    assignment = get_object_or_404(Assignment, pk=pk)
+    question = Question.objects.filter(assignment_id = pk)
+    question_i = Question.objects.filter(assignment_id = pk).values("question_image")
+    return render(request, 'students/take_assignment.html', {
+        'assignments': assignment,
+        'question': question,
+        'questionimages' : question_i
+    })

@@ -36,4 +36,9 @@ class QuestionForm(forms.ModelForm):
 
     class Meta:
         model = Question
-        fields = ('text', )
+        fields = ('text', 'question_image', )
+
+# class DocumentForm(forms.ModelForm):
+#     class Meta:
+#         model = Document
+#         fields = ('description', 'document', )

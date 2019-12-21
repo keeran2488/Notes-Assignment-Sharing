@@ -1,4 +1,6 @@
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 # from .views import home, AssignmentListView, AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, question_add, question_change
 from .views import *
 
@@ -9,7 +11,7 @@ urlpatterns = [
         path('', StudentAssignmentListView.as_view(), name='assignment_list'),
         # path('interests/', students.StudentInterestsView.as_view(), name='student_interests'),
         # path('taken/', students.TakenQuizListView.as_view(), name='taken_quiz_list'),
-        # path('quiz/<int:pk>/', students.take_quiz, name='take_quiz'),
+        path('assignment/<int:pk>/', take_assignment, name='take_assignment'),
     ], 'classroom'), namespace='students')),
 
     path('teacher/', include(([
@@ -23,3 +25,5 @@ urlpatterns = [
         path('assignment/<int:assignment_pk>/question/<int:question_pk>/delete/', QuestionDeleteView.as_view(), name='question_delete'),
     ], 'classroom'), namespace='teachers')),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

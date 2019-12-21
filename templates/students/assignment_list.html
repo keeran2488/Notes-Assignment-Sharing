@@ -16,11 +16,11 @@
                 {% for assignment in assignments %}
                 <tr>
                     {% if assignment.submission_date < timen %}
-                        <td class="align-middle"><del>{{ assignment.name }}</del></td>
+                        <td class="align-middle"><del><a href="{% url 'students:take_assignment' assignment.pk %}">{{ assignment.name }}</a></del></td>
                         <td class="align-middle"><del>{{ assignment.subject }}</del></td>
                         <td class="align-middle"><del>{{ assignment.submission_date }}</del></td>
                     {% else %}
-                        <td class="align-middle">{{ assignment.name }}</td>
+                        <td class="align-middle"><a href="{% url 'students:take_assignment' assignment.pk %}">{{ assignment.name }}</a></td>
                         <td class="align-middle">{{ assignment.subject }}</td>
                         <td class="align-middle">{{ assignment.submission_date }}</td>
                     {% endif %}

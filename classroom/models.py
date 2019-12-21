@@ -33,11 +33,10 @@ class Assignment(models.Model):
 class Question(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField('Question', max_length=255)
-    question_image = models.ImageField(upload_to='media/', verbose_name='Image')
+    question_image = models.ImageField(upload_to='media/', verbose_name='Image', null=True)
 
     def __str__(self):
         return self.text
-        
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key = True)
