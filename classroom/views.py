@@ -3,18 +3,23 @@ from django.db.models import IntegerField
 from django.db.models.functions import Cast
 from django.contrib import messages
 from datetime import date
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
 from django.views.generic import CreateView
+from django.views.generic.edit import FormView
 from django.contrib.auth.decorators import user_passes_test
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 from django.core.mail import send_mail
+from django.forms import modelformset_factory
 
-from .models import User, Assignment, Question, Subject, Student
-from .forms import StudentSignUpForm, TeacherSignUpForm, QuestionForm
+from .decorators import *
+from .models import User, Assignment, Question, Subject, Student, StudentAnswer, StudentAnswerImage, AnswerRemark
+from .forms import StudentSignUpForm, TeacherSignUpForm, QuestionForm, StudentAnswerForm, StudentAnswerImageForm, AnswerRemarkForm
 
 def home(request):
     if request.user.is_authenticated:
@@ -63,6 +68,7 @@ def teachersignup(request):
     return render(request, 'registration/signup_form.html', {'form': form,'user_type':user_t})
 
 
+@method_decorator([login_required, teacher_required], name='dispatch')
 class AssignmentListView(ListView):
     model = Assignment
     ordering = ('name',)
@@ -74,6 +80,7 @@ class AssignmentListView(ListView):
         return queryset
 
 
+@method_decorator([login_required, teacher_required], name='dispatch')
 class AssignmentCreateView(CreateView):
     model = Assignment
     fields = ('name', 'subject','submission_date',)
@@ -83,22 +90,23 @@ class AssignmentCreateView(CreateView):
         assignment = form.save(commit=False)
         assignment.owner = self.request.user
         assignment.save()
-        custom_subject = 'New Assignment: ' + form.cleaned_data.get('name')
-        custom_message = 'This assignment must be submitted before ' + form.cleaned_data.get('submission_date').strftime("%Y/%m/%d")
-        a_semester = Subject.objects.filter(name = form.cleaned_data.get('subject')).annotate(as_int=Cast('semester', IntegerField())).get()
-        receiver = []
-        for studentemail in Student.objects.filter(semester=a_semester.as_int).values_list('user__email', flat=True):
-            receiver.append(studentemail)
-        send_mail(
-            custom_subject,
-            custom_message,
-            'chaudharyk456@gmail.com',
-            receiver
-        )
+        # custom_subject = 'New Assignment: ' + form.cleaned_data.get('name')
+        # custom_message = 'This assignment must be submitted before ' + form.cleaned_data.get('submission_date').strftime("%Y/%m/%d")
+        # a_semester = Subject.objects.filter(name = form.cleaned_data.get('subject')).annotate(as_int=Cast('semester', IntegerField())).get()
+        # receiver = []
+        # for studentemail in Student.objects.filter(semester=a_semester.as_int).values_list('user__email', flat=True):
+        #     receiver.append(studentemail)
+        # send_mail(
+        #     custom_subject,
+        #     custom_message,
+        #     'chaudharyk456@gmail.com',
+        #     receiver
+        # )
         messages.success(self.request, 'The assignment was created! Add some questions to it.')
         return redirect('teachers:assignment_change', assignment.pk)
 
-        
+
+@method_decorator([login_required, teacher_required], name='dispatch')        
 class AssignmentUpdateView(UpdateView):
     model = Assignment
     fields = ('name', 'subject','submission_date',)
@@ -116,6 +124,7 @@ class AssignmentUpdateView(UpdateView):
         return reverse('teachers:assignment_change', kwargs={'pk': self.object.pk})
     
 
+@method_decorator([login_required, teacher_required], name='dispatch')
 class AssignmentDeleteView(DeleteView):
     model = Assignment
     context_object_name = 'assignments'
@@ -130,6 +139,8 @@ class AssignmentDeleteView(DeleteView):
         return self.request.user.assignments.all()
     
 
+@login_required
+@teacher_required
 def question_add(request, pk):
     assignment = get_object_or_404(Assignment, pk=pk, owner=request.user)
 
@@ -147,6 +158,8 @@ def question_add(request, pk):
     return render(request, 'teachers/question_add_form.html', {'assignments': assignment, 'form': form})
 
 
+@login_required
+@teacher_required
 def question_change(request, assignment_pk, question_pk):
     assignment = get_object_or_404(Assignment, pk=assignment_pk, owner=request.user)
     question = get_object_or_404(Question, pk=question_pk, assignment=assignment)
@@ -168,7 +181,7 @@ def question_change(request, assignment_pk, question_pk):
     })
 
 
-# @method_decorator([login_required, teacher_required], name='dispatch')
+@method_decorator([login_required, teacher_required], name='dispatch')
 class QuestionDeleteView(DeleteView):
     model = Question
     context_object_name = 'question'
@@ -190,6 +203,43 @@ class QuestionDeleteView(DeleteView):
     def get_success_url(self):
         question = self.get_object()
         return reverse('teachers:assignment_change', kwargs={'pk': question.assignment_id})
+
+
+@login_required
+@teacher_required
+def view_result(request, pk):
+    assignment = get_object_or_404(Assignment, pk=pk)
+    answered_student = StudentAnswer.objects.filter(assignment_id = pk)
+
+    return render(request, 'teachers/view_result.html', {
+        'assignments': assignment,
+        'answered_student': answered_student,
+    })
+
+
+@login_required
+@teacher_required
+def view_answer(request, assignments_pk, asn_pk):
+    assignment = get_object_or_404(Assignment, pk=assignments_pk)
+    answered_image = StudentAnswerImage.objects.filter(studentanswer_id = asn_pk)
+    studentanswer = get_object_or_404(StudentAnswer, pk=asn_pk)
+    if request.method == 'POST':
+        form = AnswerRemarkForm(request.POST)
+        if form.is_valid():
+            remark = form.save(commit=False)
+            remark.studentanswer = studentanswer 
+            remark.save()
+            messages.success(request, 'Remarks added successfully!')
+            return redirect('teachers:view_result_student', assignments_pk, asn_pk)
+    else:
+        form = AnswerRemarkForm()
+
+    return render(request, 'teachers/view_answers.html', {
+        'answered_image': answered_image,
+        'assignments': assignment,
+        'form':form,
+    })
+
 
 
 
@@ -223,6 +273,7 @@ def studentsignup(request):
     return render(request, 'registration/signup_form.html', {'form': form,'user_type':user_t})
 
 
+@method_decorator([login_required, student_required], name='dispatch')
 class StudentAssignmentListView(ListView):
     model = Assignment
     ordering = ('name',)
@@ -231,16 +282,24 @@ class StudentAssignmentListView(ListView):
 
     def get_context_data(self, **kwargs):
         kwargs['timen'] = date.today()
+        # kwargs['remarks'] = AnswerRemark.objects.filter(studentanswer__assignment_id__in = [1,2], studentanswer__student_id = self.request.user.id)
         return super().get_context_data(**kwargs)
+
+    # def remark_answer(self):
+    #     return AnswerRemark.objects.filter(studentanswer__assignment_id = 1, studentanswer__student_id = 3)
 
     def get_queryset(self):
         student = self.request.user.student
         student_semester = Student.objects.filter(pk = self.request.user.student.pk).values_list('semester', flat=True)
         student_subs = Subject.objects.filter(semester__in = student_semester).values_list('pk', flat=True)
-        queryset = Assignment.objects.filter(subject__in = student_subs).order_by('-submission_date')
+        assign = Assignment.objects.filter(subject__in = student_subs).order_by('-submission_date')
+        remarks = AnswerRemark.objects.filter(studentanswer__assignment_id__in = [1,2], studentanswer__student_id = self.request.user.id)
+        queryset = zip(assign, remarks)
         return queryset
 
 
+@login_required
+@student_required
 def take_assignment(request, pk):
     assignment = get_object_or_404(Assignment, pk=pk)
     question = Question.objects.filter(assignment_id = pk)
@@ -248,5 +307,34 @@ def take_assignment(request, pk):
     return render(request, 'students/take_assignment.html', {
         'assignments': assignment,
         'question': question,
-        'questionimages' : question_i
+        'questionimages' : question_i,
+    })
+
+
+@login_required
+@student_required
+def submit_answer(request, pk):
+    assignment = get_object_or_404(Assignment, pk=pk)
+    user = request.user.student
+    if request.method == "POST":
+        form = StudentAnswerForm(request.POST)
+        file_form = StudentAnswerImageForm(request.POST, request.FILES)
+        files = request.FILES.getlist('answer_image')
+        if form.is_valid() and file_form.is_valid():
+            student_answer = form.save(commit=False)
+            student_answer.student = user
+            student_answer.assignment = assignment
+            student_answer.save()
+            for f in files:
+                file_instance = StudentAnswerImage(answer_image = f, studentanswer = student_answer)
+                file_instance.save()
+            messages.success(request,"Answers have been submitted!")
+            return redirect("students:assignment_list")
+    else:
+        form = StudentAnswerForm
+        file_form = StudentAnswerImageForm
+    return render(request, 'students/submit_answer.html', {
+        'form':form,
+        'file_form':file_form,
+        'assignments': assignment,
     })

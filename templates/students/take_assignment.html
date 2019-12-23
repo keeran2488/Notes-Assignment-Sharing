@@ -15,5 +15,5 @@
     {% endfor %}
     <br><br><br>
     <a href="{% url 'students:assignment_list' %}" class="btn btn-primary" role="button">Back</a>
-    <a href="#" class="btn btn-primary" role="button">Submit Answers</a>
+    <a href="{% url 'students:submit_answer' assignments.pk%}" class="btn btn-primary" role="button">Submit Answers</a>
 {% endblock content %}

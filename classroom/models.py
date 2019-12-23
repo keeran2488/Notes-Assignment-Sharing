@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
 
 
+
 class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
@@ -33,7 +34,7 @@ class Assignment(models.Model):
 class Question(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField('Question', max_length=255)
-    question_image = models.ImageField(upload_to='media/', verbose_name='Image', null=True)
+    question_image = models.ImageField(upload_to='media/', verbose_name='Image', blank=True)
 
     def __str__(self):
         return self.text
@@ -64,4 +65,19 @@ def update_user_profile(sender, instance, created, **kwargs):
 
 class StudentAnswer(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='assignment_answers')
-    answer_image = models.ImageField(upload_to='media/', verbose_name='Answer Image')
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+    text = models.CharField(max_length=255, null=True)
+
+
+class AnswerRemark(models.Model):
+    Remarks = models.TextField('Remarks', default="No remarks added!", null=True)
+    studentanswer = models.ForeignKey(StudentAnswer, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.Remarks
+    
+    
+
+class StudentAnswerImage(models.Model):
+    studentanswer = models.ForeignKey(StudentAnswer, on_delete=models.CASCADE)
+    answer_image = models.ImageField(upload_to='media/', verbose_name='Answer Image', blank=True)

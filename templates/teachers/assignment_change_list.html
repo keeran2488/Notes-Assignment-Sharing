@@ -22,7 +22,7 @@
                         <td class="align-middle"><a href="{% url 'teachers:assignment_change' assignment.pk%}">{{ assignment.name }}</a></td>
                         <td class="align-middle">{{ assignment.subject }}</td>
                         <td class="align-middle">{{ assignment.subject.semester }}</td>
-                        <td class="align-middle"><a href="#" class="btn btn-primary" role="button">Result</a></td>
+                        <td class="align-middle"><a href="{% url 'teachers:view_result' assignment.pk %}" class="btn btn-primary" role="button">Result</a></td>
                     </tr>
                 {% empty %}
                     <tr>

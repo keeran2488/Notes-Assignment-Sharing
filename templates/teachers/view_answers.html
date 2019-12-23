@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %} {{ assignments.name }} {% endblock title %}
+
+{% block content %}
+    <br>
+    {% for qq in answered_image %}
+        <a href="/media/{{ qq.answer_image }}" download><img src="/media/{{ qq.answer_image }}" class="img-responsive" style="width:32%; height:60%;"/></a>
+    {% empty %}
+
+    {% endfor %}
+    <br><br>
+    <form method ="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'teachers:view_result' assignments.pk %}" role="button" class="btn btn-primary">Back</a>
+    </form>
+{% endblock content %}

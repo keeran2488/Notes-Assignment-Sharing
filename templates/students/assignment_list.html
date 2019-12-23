@@ -10,19 +10,22 @@
                 <th>Assignment</th>
                 <th>Subject</th>
                 <th>Submission Date</th>
+                <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>
-                {% for assignment in assignments %}
+                {% for assign, remarks in assignments %}
                 <tr>
-                    {% if assignment.submission_date < timen %}
-                        <td class="align-middle"><del><a href="{% url 'students:take_assignment' assignment.pk %}">{{ assignment.name }}</a></del></td>
-                        <td class="align-middle"><del>{{ assignment.subject }}</del></td>
-                        <td class="align-middle"><del>{{ assignment.submission_date }}</del></td>
+                    {% if assign.submission_date < timen %}
+                        <td class="align-middle"><del><a href="{% url 'students:take_assignment' assign.pk %}">{{ assign.name }}</a></del></td>
+                        <td class="align-middle"><del>{{ assign.subject }}</del></td>
+                        <td class="align-middle"><del>{{ assign.submission_date }}</del></td>
+                        <td class="align-middle">{{ remarks.Remarks }}</td>
                     {% else %}
-                        <td class="align-middle"><a href="{% url 'students:take_assignment' assignment.pk %}">{{ assignment.name }}</a></td>
-                        <td class="align-middle">{{ assignment.subject }}</td>
-                        <td class="align-middle">{{ assignment.submission_date }}</td>
+                        <td class="align-middle"><a href="{% url 'students:take_assignment' assign.pk %}">{{ assign.name }}</a></td>
+                        <td class="align-middle">{{ assign.subject }}</td>
+                        <td class="align-middle">{{ assign.submission_date }}</td>
+                        <td class="align-middle">{{ remarks.Remarks }}</td>
                     {% endif %}
                 </tr>
                 {% empty %}

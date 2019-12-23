@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'classroom',
     'crispy_forms',
+    'multiforloop',
 ]
 
 MIDDLEWARE = [

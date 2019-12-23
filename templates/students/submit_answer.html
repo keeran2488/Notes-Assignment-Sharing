@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
 
-{% load crsipy_forms_tags %}
+{% load crispy_forms_tags %}
 
 {% block title %} {{ assignments.name }} {% endblock title %}
 
 {% block content %}
-
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        {{ file_form|crispy }}
+        <button type="submit" class="btn btn-success">Upload</button>
+        <a href="{% url 'students:take_assignment' assignments.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+    </form>
 {% endblock content %}

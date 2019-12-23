@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assignments.name }}{% endblock title %}
+
+{% block content %}
+    <h2 class="mb-3">Answers</h2>
+    <div class='card'>
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll no</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asn in answered_student %}
+                    <tr>
+                        <td class="align-middle">{{ asn.student.user.username }}</td>
+                        <td class="align-middle">{{ asn.student.roll_no }}</td>
+                        <td class="align-middle"><a href="{% url 'teachers:view_result_student' assignments.pk asn.pk %}" class="btn btn-primary" role="button">View Answers</a></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td>No answers submitted!</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}
